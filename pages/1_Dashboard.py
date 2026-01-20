@@ -17,5 +17,6 @@ for position in positions:
     col1, col2 = row.columns(2)
     col1.markdown(f"##  {position['ticker']}")
     col1.markdown(f"###### {position["shares"]}")
-    col2.line_chart(df, x="timestamp", y="close")
+    print(position["change_today"])
+    col2.line_chart(df, x="timestamp", y="close", color= "#00ff00" if (position["change_today"] > 0) else "#ff0000")
     

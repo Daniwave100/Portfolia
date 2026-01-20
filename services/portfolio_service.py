@@ -44,14 +44,14 @@ class PortfolioService:
         
         return positions
     
-    def get_day_chart(self, ticker, days=30):
+    def get_day_chart(self, ticker, hours=6):
         """
         Get data for the day to make daily chart
         """
         request = StockBarsRequest(
             symbol_or_symbols = ticker,
-            timeframe=TimeFrame.Day, # basically TimeFrame.Day is Alpaca's way of saying day timeframe
-            start = datetime.now() - timedelta(days=days), # look up what this does
+            timeframe=TimeFrame.Hour, # basically TimeFrame.Day is Alpaca's way of saying day timeframe
+            start = datetime.now() - timedelta(hours=hours), # look up what this does
             end = datetime.now()
         )
 
@@ -68,6 +68,7 @@ class PortfolioService:
                 "volume": int(bar.volume)
             })
 
+        print()
         df = pd.DataFrame(chart_data)
 
         return df
