@@ -10,10 +10,6 @@ from config.settings import ALPACA_API_KEY, ALPACA_SECRET_KEY
 import streamlit as st
 import pandas as pd
 
-# Debug: Print to verify they're loading
-print(f"API Key: {ALPACA_API_KEY}")
-print(f"Secret Key: {ALPACA_SECRET_KEY}")
-
 class PortfolioService:
     def __init__(self, db_connection):
         self.db = db_connection
@@ -87,6 +83,6 @@ class PortfolioService:
 if __name__ == "__main__":
     
     portfolio = PortfolioService("hi")
-    chart_data = portfolio.get_day_chart("TSLA")
+    chart_data = portfolio.sync_positions_with_alpaca()
     print(chart_data)
     
