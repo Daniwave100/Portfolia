@@ -1,0 +1,1 @@
+# code streamlit can use to fetch digest from s3

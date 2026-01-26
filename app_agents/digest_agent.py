@@ -7,11 +7,14 @@ from config.settings import OPENAI_API_KEY, MARKET_AUX_KEY
 from services.portfolio_service import PortfolioService
 import http.client, urllib.parse
 import json
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 class DigestAgent:
     def __init__(self):
         self.portfolio_service = PortfolioService("test")
         self.tickers = [position["ticker"] for position in self.portfolio_service.sync_positions_with_alpaca()]
+        self.model = "gpt-5.2"
         self.prompt = f"""
         You are a stock portfolio news summarizer.
         You will have access to a person's portfolio information, including stock positions, number of stocks, and more.
@@ -45,25 +48,24 @@ class DigestAgent:
     # run agent
     def run_agent(self):
         all_news = self.search_web_for_news()
-        digest_agent = Agent(name="Digest Agent", instructions=self.prompt)
+        digest_agent = Agent(name="Digest Agent", 
+                             instructions=self.prompt, 
+                             model=self.model)
         result = Runner.run_sync(digest_agent, all_news)
-        print(result)
-        return result
+        # convert result into string. “If result has an attribute named final_output, return it”
+        digest_text = getattr(result, "final_output", None)
+        # get EST time
+        now_et = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d %H:%M:%S %Z")
+        return {"Time": now_et, "Model": self.model,"Tickers": self.tickers, "LLM digest": digest_text}
+
     
 if __name__ == "__main__":
     agent = DigestAgent()
     print(agent.tickers)
 
-    print(agent.run_agent())
-    
+    result = agent.run_agent()
+    print(result)
+    print(type(result))
 
-# okay so far we are getting 3 news articles for the stocks we have in our portfolio
-# i have to look into i tmore because it seems like we're only getting news on the first stock
-# it might be because the search performs on the first ticker and then the second one comes up after but we are limited to 3 artciles per call
-# explore how to fix this. maybe a loop and do one ticker at a time
-# maybe we have to pay?
 
-# tomorrow we will have to extract the data in here and organize it to pass into the LLM
-# the tool will have to be an agent tool
-# then we refine the prompt and let the agent handle the LLM summarizing
 

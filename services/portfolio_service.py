@@ -5,7 +5,9 @@ from alpaca.trading.client import TradingClient
 from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame
 from alpaca.data.historical.stock import StockHistoricalDataClient
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone, time
+from alpaca.data.enums import DataFeed
+from zoneinfo import ZoneInfo
 from config.settings import ALPACA_API_KEY, ALPACA_SECRET_KEY
 import streamlit as st
 import pandas as pd
@@ -39,34 +41,57 @@ class PortfolioService:
             positions.append(clean_position)
         
         return positions
-    
-    def get_day_chart(self, ticker, hours=6):
+
+    # utilized GPT-5.2 to fix this function 
+    def get_day_chart(self, ticker: str, lookback_days: int = 5, include_extended: bool = False):
         """
-        Get data for the day to make daily chart
+        Robinhood-like 1D mini chart using 1-minute bars.
+        Fetches the last few days and then keeps only the latest trading session.
         """
+        symbol = (ticker or "").strip().upper()
+        if not symbol:
+            return pd.DataFrame(columns=["timestamp", "open", "low", "high", "close", "volume"])
+        end = datetime.now(timezone.utc)
+        start = end - timedelta(days=lookback_days)
         request = StockBarsRequest(
-            symbol_or_symbols = ticker,
-            timeframe=TimeFrame.Hour, # basically TimeFrame.Day is Alpaca's way of saying day timeframe
-            start = datetime.now() - timedelta(hours=hours), # look up what this does
-            end = datetime.now()
+            symbol_or_symbols=symbol,
+            timeframe=TimeFrame.Minute,
+            start=start,
+            end=end,
+            feed=DataFeed.IEX,  # change to DataFeed.SIP if you have it
         )
-
         stock_bars = self.data_client.get_stock_bars(request)
-        print(stock_bars)
-        chart_data = []
-        for bar in stock_bars[ticker]:
-            chart_data.append({
-                "timestamp": bar.timestamp,
-                "open": float(bar.open),
-                "low": float(bar.low),
-                "high": float(bar.high),
-                "close": float(bar.close),
-                "volume": int(bar.volume)
-            })
-
-        print()
-        df = pd.DataFrame(chart_data)
-
+        try:
+            bars = stock_bars[symbol]
+        except KeyError:
+            bars = []
+        if not bars:
+            return pd.DataFrame(columns=["timestamp", "open", "low", "high", "close", "volume"])
+        df = pd.DataFrame(
+            [
+                {
+                    "timestamp": bar.timestamp,
+                    "open": float(bar.open),
+                    "low": float(bar.low),
+                    "high": float(bar.high),
+                    "close": float(bar.close),
+                    "volume": int(bar.volume),
+                }
+                for bar in bars
+            ]
+        )
+        # Convert to market timezone and keep only the latest session's minutes
+        ny = ZoneInfo("America/New_York")
+        df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True).dt.tz_convert(ny)
+        latest_day = df["timestamp"].dt.date.max()
+        df = df[df["timestamp"].dt.date == latest_day]
+        if include_extended:
+            # Extended hours approx 4:00–20:00 ET
+            start_t, end_t = time(4, 0), time(20, 0)
+        else:
+            # Regular session 9:30–16:00 ET
+            start_t, end_t = time(9, 30), time(16, 0)
+        df = df[(df["timestamp"].dt.time >= start_t) & (df["timestamp"].dt.time <= end_t)]
         return df
     
     def get_portfolio_summary(self):
