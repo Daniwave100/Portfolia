@@ -12,3 +12,6 @@
 # integrate with streamlit
 # host on ec2
 # create daily job run for digest summary
+
+# Monday 01/26
+# Enable AWS authentication in Streamlit so daily digest fetch works
