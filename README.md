@@ -8,54 +8,41 @@ Portfolia is an intelligent investment management application that combines port
 
 ## Features
 
-### 📊 Portfolio Dashboard
-- Manual stock position management
-- Real-time stock charts and position tracking
-- Portfolio risk analysis engine
-- Persistent data storage in SQL database
-- Future integration with paper trading platforms
+### 📰 Daily Market Digest (Live)
+- Automated daily market and news digest generated using LLMs
+- Scheduled execution via **cron on AWS EC2**
+- Ingests external news and market data through APIs
+- Stores structured daily digests as JSON in **Amazon S3**
+- Designed for reuse by downstream applications (e.g. Streamlit)
 
-### 📈 Stock Analysis Service
-- Multi-timeframe analysis (short, medium, long-term)
-- Trend analysis and volatility metrics
-- Risk assessment for investment opportunities
-- AI-powered insights
+### 📊 Portfolio Dashboard (In Progress)
+- Streamlit-based interactive dashboard
+- Planned portfolio position tracking and summaries
+- Will consume precomputed digests from S3
+- Visualizations and portfolio insights under development
 
-### 📧 Email Digest Service
-- Daily portfolio summaries
-- Risk alerts and notifications
-- "What changed" updates
-- Personalized investment insights
+### 📈 Stock Analysis Service (In Progress)
+- Planned multi-timeframe stock analysis
+- Trend and volatility metrics
+- AI-assisted investment insights
+- Future integration with additional market data APIs
 
 ## Tech Stack
 
-- **Frontend**: Streamlit
-- **Database**: SQL (user data, holdings, preferences)
-- **Vector Database**: Memory storage for historical decisions and news summaries
-- **AI**: OpenAI API for analysis and insights
-- **Python**: Core application logic
+### Cloud & Infrastructure
+- **AWS EC2** – compute for scheduled batch jobs
+- **Ubuntu Linux** – operating system
+- **Cron** – native Linux scheduler for automation
+- **Amazon S3** – durable object storage for daily digests
 
-## Setup
+### Backend & AI
+- **Python** – core application logic
+- **Virtual Environments (venv)** – dependency isolation
+- **OpenAI API** – LLM-powered summarization and analysis
+- **External APIs** – news and market data ingestion
 
-1. Clone the repository
-2. Create a virtual environment:
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Mac/Linux
-   ```
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Create a `.env` file with your API keys:
-   ```
-   OPENAI_API_KEY=your_key_here
-   DATABASE_URL=your_database_url
-   ```
-5. Run the app:
-   ```bash
-   streamlit run app.py
-   ```
+### Frontend
+- **Streamlit** – interactive web application (in development)
 
 ## Project Status
 
