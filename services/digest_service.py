@@ -51,7 +51,6 @@ class DigestService():
 
 if __name__ == "__main__":
     digest_service = DigestService()
-
     path = digest_service.digest_to_s3()
     print(path)
 
