@@ -11,7 +11,7 @@ Portfolia is an intelligent investment management application that combines port
 ### 📰 Daily Market Digest (Live)
 - Automated daily market and news digest generated using LLMs
 - Scheduled execution via **cron on AWS EC2**
-- Ingests external news and market data through APIs
+- Ingests external news and market data through MarketAux API
 - Stores structured daily digests as JSON in **Amazon S3**
 - Designed for reuse by downstream applications (e.g. Streamlit)
 
@@ -22,7 +22,7 @@ Portfolia is an intelligent investment management application that combines port
 - Visualizations and portfolio insights under development
 
 ### 📈 Stock Analysis Service (In Progress)
-- Planned multi-timeframe stock analysis
+- Planned multi-timeframe stock analysis (short-term, long-term)
 - Trend and volatility metrics
 - AI-assisted investment insights
 - Future integration with additional market data APIs
@@ -32,14 +32,12 @@ Portfolia is an intelligent investment management application that combines port
 ### Cloud & Infrastructure
 - **AWS EC2** – compute for scheduled batch jobs
 - **Ubuntu Linux** – operating system
-- **Cron** – native Linux scheduler for automation
-- **Amazon S3** – durable object storage for daily digests
+- **Amazon S3** – object storage for daily digests
 
 ### Backend & AI
 - **Python** – core application logic
-- **Virtual Environments (venv)** – dependency isolation
 - **OpenAI API** – LLM-powered summarization and analysis
-- **External APIs** – news and market data ingestion
+- **External APIs** – MarketAux API for news and alpaca-py SDK for market data ingestion
 
 ### Frontend
 - **Streamlit** – interactive web application (in development)
