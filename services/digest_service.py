@@ -23,7 +23,7 @@ class DigestService():
     def digest_to_s3(self):
         et = ZoneInfo("America/New_York")
         date_key = datetime.now(et).date().isoformat()
-        s3_object_key = f"digests/{date_key}.json"
+        s3_object_key = f"{self.prefix}/{date_key}.json"
 
         body = self.run_digest()
 
