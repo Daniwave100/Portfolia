@@ -7,6 +7,7 @@ import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import boto3
+from config.settings import AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY
 
 class DigestService():
     def __init__(self):
@@ -40,6 +41,12 @@ class DigestService():
         s3_object_key = f"{self.prefix}/{date_key}.json"
 
         s3 = boto3.client("s3", region_name=self.region)
+        s3 = boto3.client(
+            "s3",
+            aws_access_key_id=AWS_ACCESS_KEY,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+            region_name=self.region,
+            )
 
         try:
             response = s3.get_object(Bucket=self.bucket_name, Key=s3_object_key)
