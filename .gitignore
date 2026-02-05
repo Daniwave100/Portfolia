@@ -209,3 +209,6 @@ __marimo__/
 # Secrets / keys
 portfolia-digest-key.pem
 *.pem
+
+.dockerignore
+Dockerfile
