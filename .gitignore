@@ -212,3 +212,7 @@ portfolia-digest-key.pem
 
 .dockerignore
 Dockerfile
+
+*.zip
+lambda_package/
+
