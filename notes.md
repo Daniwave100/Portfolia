@@ -15,3 +15,7 @@
 
 # Monday 01/26
 # Enable AWS authentication in Streamlit so daily digest fetch works
+
+# Sunday 2/1
+# Look at using Lambda instead of EC2
+# Run Streamlit app on EC2 using Docker (look at ECS) instead of Streamlit Community Cloud

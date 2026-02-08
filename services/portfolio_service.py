@@ -9,7 +9,10 @@ from datetime import datetime, timedelta, timezone, time
 from alpaca.data.enums import DataFeed
 from zoneinfo import ZoneInfo
 from config.settings import ALPACA_API_KEY, ALPACA_SECRET_KEY
-import streamlit as st
+try:
+    import streamlit as st
+except ImportError:
+    st = None
 import pandas as pd
 
 class PortfolioService:
