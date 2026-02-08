@@ -9,17 +9,19 @@ from datetime import datetime, timedelta, timezone, time
 from alpaca.data.enums import DataFeed
 from zoneinfo import ZoneInfo
 from config.settings import ALPACA_API_KEY, ALPACA_SECRET_KEY
-try:
-    import streamlit as st
-except ImportError:
-    st = None
 import pandas as pd
+import requests
 
 class PortfolioService:
     def __init__(self, db_connection):
         self.db = db_connection
         self.trading_client = TradingClient(ALPACA_API_KEY, ALPACA_SECRET_KEY, paper=True)
         self.data_client = StockHistoricalDataClient(ALPACA_API_KEY, ALPACA_SECRET_KEY)
+        self.headers = {
+            "accept": "application/json",
+            "APCA-API-KEY-ID": "PK3Q4WTORNNWXYWEBDPMTICPVI",
+            "APCA-API-SECRET-KEY": "2ivo5K7TVJJSnJ7PJFSHWA3GzwcdYaJPkP7HHCU9U2ND"
+        }
 
     def sync_positions_with_alpaca(self):
         """
@@ -48,7 +50,7 @@ class PortfolioService:
     # utilized GPT-5.2 to fix this function 
     def get_day_chart(self, ticker: str, lookback_days: int = 5, include_extended: bool = False):
         """
-        Robinhood-like 1D mini chart using 1-minute bars.
+        1D mini chart using 1-minute bars.
         Fetches the last few days and then keeps only the latest trading session.
         """
         symbol = (ticker or "").strip().upper()
@@ -97,9 +99,37 @@ class PortfolioService:
         df = df[(df["timestamp"].dt.time >= start_t) & (df["timestamp"].dt.time <= end_t)]
         return df
     
-    def get_portfolio_summary(self):
-        """Calculate total value, gains/losses"""
-        pass
+    def get_portfolio_summary(self, period="1M", timeframe="1D"):
+        """Get portfolio summary with historical data for charting"""
+        account = self.trading_client.get_account()
+
+        url = f"https://paper-api.alpaca.markets/v2/account/portfolio/history?period={period}&timeframe={timeframe}"
+        response = requests.get(url, headers=self.headers)
+        data = response.json()
+
+        # Build history dataframe
+        history_df = pd.DataFrame({
+            "timestamp": pd.to_datetime(data["timestamp"], unit="s"),
+            "equity": data["equity"]
+        })
+
+        # Calculate stats
+        current = float(account.equity)
+        previous = float(account.last_equity)
+        starting = history_df["equity"].iloc[0] if len(history_df) > 0 else current
+
+        summary = {
+            "total_equity": current,
+            "cash": float(account.cash),
+            "buying_power": float(account.buying_power),
+            "total_gain_loss": current - starting,
+            "total_gain_loss_pct": ((current - starting) / starting * 100) if starting > 0 else 0,
+            "day_gain_loss": current - previous,
+            "day_gain_loss_pct": ((current - previous) / previous * 100) if previous > 0 else 0
+        }
+
+        return {"summary": summary, "history": history_df}
+        
     
     def calculate_risk_metrics(self):
         """Portfolio risk analysis"""
@@ -112,5 +142,8 @@ if __name__ == "__main__":
     
     portfolio = PortfolioService("hi")
     chart_data = portfolio.sync_positions_with_alpaca()
-    print(chart_data)
+    # print(chart_data)
+    # print(portfolio.trading_client.get_account())
+
+    print("summary: ", portfolio.get_portfolio_summary())
     
